@@ -3,7 +3,6 @@ const { App } = pkg;
 import dotenv from "dotenv";
 import { analyzeSentiment } from "./services/sentiment.js";
 import { suggestRewrite } from "./services/rewriter.js";
-import { checkProfanity } from "./services/filter.js";
 
 // Load environment variables
 dotenv.config();
@@ -26,18 +25,24 @@ app.command("/check", async ({ command, ack, say }) => {
   const lang = detectLang(text);
   const sentiment = await analyzeSentiment(text, lang);
   const rewrite = await suggestRewrite(text, lang);
-  const profanity = await checkProfanity(text);
+
+  let toneCategory;
+  const score = sentiment.score;
+  if (score < -0.5) {
+    toneCategory = '不適切';
+  } else if (score < -0.1) {
+    toneCategory = 'アグレッシブ';
+  } else if (score < 0.1) {
+    toneCategory = '曖昧';
+  } else {
+    toneCategory = '適切';
+  }
 
   let message = `🧠 *ToneCheck結果*\n\n`;
   message += `・言語: ${lang}\n`;
-  message += `・感情スコア: ${sentiment.score}\n`;
-  message += `・トーン分類: ${sentiment.tone}\n`;
-
-  if (profanity.length > 0) {
-    message += `⚠️ 不適切語検出: ${profanity.join(", ")}\n`;
-  }
-
-  message += `💬 提案: ${rewrite}`;
+  message += `・トーン分類: ${toneCategory}\n\n`;
+  message += `📄 元の文章:\n${text}\n\n`;
+  message += `💡 提案された文章:\n${rewrite}`;
 
   await say({
     text: message,
@@ -45,6 +50,7 @@ app.command("/check", async ({ command, ack, say }) => {
   });
 });
 
+// Start the app
 (async () => {
   await app.start(process.env.PORT || 3000);
   console.log("⚡ ToneCheck Bot is running!");
