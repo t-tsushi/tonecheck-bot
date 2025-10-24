@@ -15,7 +15,7 @@ function detectLang(text) {
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  socketMode: false
+  socketMode: false,
 });
 
 // Handle the /check command
@@ -24,7 +24,6 @@ app.command("/check", async ({ command, ack, say }) => {
   const text = command.text;
   const lang = detectLang(text);
   const sentiment = await analyzeSentiment(text, lang);
-  const rewrite = await suggestRewrite(text, lang);
 
   let toneCategory;
   const score = sentiment.score;
@@ -38,6 +37,8 @@ app.command("/check", async ({ command, ack, say }) => {
     toneCategory = '適切';
   }
 
+  const rewrite = await suggestRewrite(text, lang, toneCategory);
+
   let message = `🧠 *ToneCheck結果*\n\n`;
   message += `・言語: ${lang}\n`;
   message += `・トーン分類: ${toneCategory}\n\n`;
@@ -46,7 +47,7 @@ app.command("/check", async ({ command, ack, say }) => {
 
   await say({
     text: message,
-    mrkdwn: true
+    mrkdwn: true,
   });
 });
 
