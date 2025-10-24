@@ -1,11 +1,16 @@
 import { App } from "@slack/bolt";
 import dotenv from "dotenv";
-import detectLang from "langdetect";
 import { analyzeSentiment } from "./services/sentiment.js";
 import { suggestRewrite } from "./services/rewriter.js";
 import { checkProfanity } from "./services/filter.js";
 
+// Load environment variables
 dotenv.config();
+
+// Simple language detection: Japanese if contains Japanese characters, else English
+function detectLang(text) {
+  return /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff]/.test(text) ? 'ja' : 'en';
+}
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -13,14 +18,11 @@ const app = new App({
   socketMode: false
 });
 
-// /check コマンドで文章を解析
+// Handle the /check command
 app.command("/check", async ({ command, ack, say }) => {
   await ack();
-
   const text = command.text;
-  const lang = detectLang.detect(text) || "ja";
-
-  // 感情分析
+  const lang = detectLang(text);
   const sentiment = await analyzeSentiment(text, lang);
   const rewrite = await suggestRewrite(text, lang);
   const profanity = await checkProfanity(text);
