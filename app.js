@@ -1,6 +1,6 @@
 const { App } = require('@slack/bolt');
 const axios = require('axios');
-const { detectLang, analyzeSentiment } = require('./services/analysis');
+const{ detectLang, analyzeSentiment } = require('./services/analysis');
 const { suggestRewrite } = require('./services/rewriter');
 
 const app = new App({
@@ -15,9 +15,9 @@ app.command('/check', async ({ command, ack, say }) => {
   const sentiment = await analyzeSentiment(text, lang);
   let toneCategory;
   const score = sentiment.score;
-  if (score < -0.4) {
+  if (score < -0.3) {
     toneCategory = '攻撃的';
-  } else if (score < -0.1) {
+  } else if (score < 0) {
     toneCategory = '攻撃的かつ曖昧';
   } else if (score < 0.1) {
     toneCategory = '曖昧';
