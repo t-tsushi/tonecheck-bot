@@ -31,7 +31,7 @@ app.command("/check", async ({ command, ack, say }) => {
   if (score < -0.5) {
     toneCategory = '不適切';
   } else if (score < -0.1) {
-    toneCategory = 'アグレッシブ';
+    toneCategory = '攻撃的';
   } else if (score < 0.1) {
     toneCategory = '曖昧';
   } else {
