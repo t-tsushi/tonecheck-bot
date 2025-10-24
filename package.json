@@ -2,7 +2,7 @@
   "name": "tonecheck-bot",
   "version": "1.0.0",
   "description": "Slack ToneCheck Bot for sentiment and tone moderation",
-   "type": "module",
+  "type": "module",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
@@ -10,7 +10,6 @@
   "dependencies": {
     "@slack/bolt": "^3.16.0",
     "axios": "^1.7.2",
-    "dotenv": "^16.4.5",
-    "langdetect": "^1.1.0"
+    "dotenv": "^16.4.5"
   }
 }
