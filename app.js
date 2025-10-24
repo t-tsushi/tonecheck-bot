@@ -1,4 +1,5 @@
-import { App } from "@slack/bolt";
+import pkg from "@slack/bolt";
+const { App } = pkg;
 import dotenv from "dotenv";
 import { analyzeSentiment } from "./services/sentiment.js";
 import { suggestRewrite } from "./services/rewriter.js";
