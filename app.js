@@ -1,4 +1,5 @@
-import { App } from '@slack/bolt';
+import pkg from '@slack/bolt';
+const { App } = pkg;
 import { analyzeSentiment } from './services/sentiment.js';
 import { suggestRewrite } from './services/rewriter.js';
 
@@ -8,12 +9,12 @@ function detectLang(text) {
 
 const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  token: process.env.SLACK_BOT_TOKEN
+  token: process.env.SLACK_BOT_TOKEN,
 });
 
 app.command('/check', async ({ ack, body, client }) => {
   await ack();
-  const text = body.text;
+  const text = body.text || '';
   const lang = detectLang(text);
   const sentiment = await analyzeSentiment(text, lang);
   const score = sentiment.score;
@@ -27,23 +28,18 @@ app.command('/check', async ({ ack, body, client }) => {
   } else {
     toneCategory = '適切';
   }
-
   const rewrite = await suggestRewrite(text, lang, toneCategory);
-
   const message =
-    '🧠 ToneCheck結果\n・言語: ' + lang +
-    '\n・トーン分類: ' + toneCategory +
-    '\n\n📄 元の文章:\n' + text +
-    '\n\n💡 提案された文章:\n' + rewrite;
+    `🧠 ToneCheck結果\n` +
+    `・言語: ${lang}\n` +
+    `・トーン分類: ${toneCategory}\n\n` +
+    `📄 元の文章:\n${text}\n\n` +
+    `💡 提案された文章:\n${rewrite}`;
 
-  try {
-    await client.chat.postMessage({
-      channel: body.channel_id,
-      text: message
-    });
-  } catch (error) {
-    console.error(error);
-  }
+  await client.chat.postMessage({
+    channel: body.channel_id,
+    text: message,
+  });
 });
 
 (async () => {
